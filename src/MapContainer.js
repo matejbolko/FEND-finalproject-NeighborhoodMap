@@ -40,11 +40,11 @@ export default class MapContainer extends Component {
 
   //google maps components
   componentDidMount() {
-    this.loadMap()
-    this.onclickLocation()
+    this.initMap()
+    this.onSideMenuLocationClick()
   }
 
-  loadMap() {
+  initMap() {
     if (this.props) {
       const {google} = this.props
       const maps = google.maps
@@ -60,6 +60,7 @@ export default class MapContainer extends Component {
     }
   }
 
+  // transformed code from Udacity Project_Code_4_WindowShoppingPart2.html
   addMarkers = () => {
     const {google} = this.props
     let {infowindow} = this.state
@@ -67,8 +68,10 @@ export default class MapContainer extends Component {
 
     // get over state.locations and create Marker for each location
     for (var i = 0; i < this.state.locations.length; i++) {
+      // Get the position from the location array.
       var position = this.state.locations[i].location;
       var title = this.state.locations[i].title;
+      // Create a marker per location, and put into markers array.
       const marker = new google.maps.Marker({
         position: {lat: position.lat, lng: position.lng},
         title: title,
@@ -77,7 +80,7 @@ export default class MapContainer extends Component {
         map: this.map
       })
 
-      // add click listener to marker and display info window
+      // Create an onclick event to open an infowindow at each marker.
       marker.addListener('click', () => {
         this.populateInfoWindow(marker, infowindow)
       })
@@ -90,6 +93,9 @@ export default class MapContainer extends Component {
     this.map.fitBounds(bounds)
   }
 
+  // This function populates the infowindow when the marker is clicked. We'll only allow
+  // one infowindow which will open at the marker that is clicked, and populate based
+  // on that markers position.
   populateInfoWindow(marker, infowindow) {
     // Check to make sure the infowindow is not already opened on this marker.
     if (infowindow.marker !== marker) {
@@ -103,24 +109,57 @@ export default class MapContainer extends Component {
     }
   }
 
-  onclickLocation = () => {
-    const that = this
-    const {infowindow} = this.state
-    const displayInfowindow = (e) => {
+  onSideMenuLocationClick = () => {
+    const displayInfowindow = (event) => {
       const {markers} = this.state
-      const markerInd = markers.findIndex(m => m.title.toLowerCase() === e.target.innerText.toLowerCase())
-      that.populateInfoWindow(markers[markerInd], infowindow)
+      // compare title of marker and sidebar tile - get index i of the marker and display infoWindows
+      const i = markers.findIndex(marker => 
+        marker.title.toLowerCase() === event.target.innerText.toLowerCase())
+      this.populateInfoWindow(markers[i], this.state.infowindow)
+      markers[i].setAnimation(this.props.google.maps.Animation.BOUNCE);
+      // remove animation after 2seconds
+      setTimeout(function () {
+        markers[i].setAnimation(null);
+      }, 2000);
     }
-    document.querySelector('.locations-list').addEventListener('click', function (e) {
-      if(e.target && e.target.nodeName === "LI") {
-        displayInfowindow(e)
+    
+    document.querySelector('.locations-list').addEventListener('click', function (event) {
+      if(event.target && event.target.nodeName === "LI") {
+        displayInfowindow(event)
       }
     })
+  }
+
+  onQueryChange = (event) => {
+    this.setState({query: event.target.value})
   }
 
   render() {
     const hideClass = this.state.visible ? 'show' : 'hide'
     const classes = `sidebarMenu ${hideClass}`
+    const { locations } = this.state
+    const { markers } = this.state
+
+    if (this.state.query) {
+      for (var i=0; i<locations.length; i++) {
+        if(locations[i].title.toLowerCase().includes(this.state.query.toLowerCase())) {
+          markers[i].setVisible(true)
+        } else {
+          if (this.state.infowindow.marker === markers[i]){
+            // close the info window if marker removed
+            this.state.infowindow.close()
+          }
+          markers[i].setVisible(false)
+        }
+      }
+    } else {
+      for (i=0; i<markers.length; i++) {
+        if (markers.length && markers[i]) {
+          markers[i].setVisible(true)
+        }
+      }
+    }
+
     return (
       <div className="Container">
         <nav>
@@ -128,20 +167,24 @@ export default class MapContainer extends Component {
         </nav>
         <div className="mainContainer">
           <div className={classes}
-          id = "sidebarMenu"
-            onChange={this.handleChange}
-          >
+               id = "sidebarMenu"
+               onChange={this.handleChange}>
+            <input role="search" type='text' 
+                   value={this.state.value}
+                   onChange={this.onQueryChange} 
+            />
             <ul className="locations-list">{
-              this.state.markers.map((m, i) =>
-                (<li key={i}>{m.title}</li>))
+              this.state.markers.filter(marker => 
+                marker.getVisible()).map((marker, i) =>
+                (<li key={i}>{marker.title}</li>))
             }</ul>
-          </div>
+          </div> {/* end of div className={classes} */}
           <div className="Main">
             <div role="application" id="map" className="map">
               Please wait. Loading map ...
             </div>  
-          </div>{ /* end of Main */ }
-        </div>
+          </div> {/* end of Main */}
+        </div> {/* end of mainContainer */}
       </div> // end of Container
     )
   }

@@ -13,16 +13,6 @@ class App extends Component {
           <h1 className="App-title">My Neighborhood</h1>
         </header>
         <MapContainer google={this.props.google} />
-        <p>Just a sample of text</p>
-        <ul>
-          <li>Lorem</li>
-          <li>Ipsum</li>
-          <li>dummy</li>
-          <li>text</li>
-          <li>printing</li>
-          <li>inductry</li>
-          <li>electronic</li>
-        </ul>
       </div> // end of App
     );
   }
