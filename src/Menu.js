@@ -11,17 +11,18 @@ class Menu extends Component {
   }
 
 updateDimensions() {
+    // set state visibility (of sidebar) to true, if width>600 - look at mediaquery
     var x = document.getElementById("sidebarMenu")
     if(this.visibility && window.innerWidth < 600) {
       x.classList.add("hide")
       x.classList.remove("show")
       this.visibility = !this.visibility;
-      console.log("manjše od 600")
+
+    // set state visibility (of sidebar) to false, if width<600 - look at mediaquery
     } else if (!this.visibility && window.innerWidth > 600) {
         x.classList.add("show")
         x.classList.remove("hide")
         this.visibility = !this.visibility
-        console.log("večje od 600")
       }
     }
 
@@ -41,7 +42,7 @@ componentWillUnmount() {
       <ol id="sidebarMenu"
           className="sidebarMenu"
           onMouseDown={this.props.handleMouseDown} 
-          className={(this.props.menuVisibility ? 'show' : 'hide')}
+          className={(this.props.menuVisibility ? 'show' : 'hide')} // button functionality hide/show
           onChange={this.handleChange}>
         <li><a href="#">Href one</a></li>
         <li><a href="#">Href two</a></li>

@@ -11,7 +11,7 @@
 .App-header {
   background-color: #ffc300;
   height: 110px;
-  padding: 20px;
+  padding: 0 20px 20px 20px;
   color: #222;
 }
 
@@ -31,8 +31,14 @@
 }
 
 .Main {
-  padding-left: 10px;
+  width: 100%;
 }
+
+.map {
+  height: calc(100vh - 160px);
+  width: 100%;
+}
+
 
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
@@ -45,6 +51,10 @@
     flex-direction: column;
     justify-content: flex-start;
   }
+  .Main {
+      height: calc(100vh - 155px);
+  }
+
 }
 
 @media (max-width: 350px) {

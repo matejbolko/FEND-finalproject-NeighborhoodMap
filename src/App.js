@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import MenuButton from './MenuButton'
 import Menu from './Menu'
+import { GoogleApiWrapper } from 'google-maps-react'
+import MapContainer from './MapContainer'
+import config from './Config'
 
 class App extends Component {
   constructor(props, context) {
@@ -42,8 +44,9 @@ class App extends Component {
         <div className="Container">
           <Menu handleMouseDown={this.handleMouseDown}
           menuVisibility={this.state.visible}
-        />
+          />
           <div className="Main">
+          <MapContainer google={this.props.google} />
             <p>Just a sample of text</p>
             <ul>
               <li>Lorem</li>
@@ -54,11 +57,13 @@ class App extends Component {
               <li>inductry</li>
               <li>electronic</li>
             </ul>
-          </div>
-        </div>
-      </div>
+          </div> { /* end of Main */ }
+        </div> { /* end of Container */ }
+      </div> // end of App
     );
   }
 }
 
-export default App;
+export default GoogleApiWrapper({
+  apiKey: config.myGoogleMapsToken
+})(App)

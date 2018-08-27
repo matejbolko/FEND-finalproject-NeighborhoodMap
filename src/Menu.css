@@ -1,6 +1,6 @@
 #sidebarMenu {
   width: 30vw;
-  height: 100vh;
+  height: calc(100vh - 175px);
   background-color: #037584;
   top: 0;
   left: 0;
