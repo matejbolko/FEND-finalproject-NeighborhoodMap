@@ -1,20 +1,47 @@
 import React, {Component} from 'react';
+import MenuButton from './MenuButton'
 
 export default class MapContainer extends Component {
-  state = {
-    locations: [
-      { title: "Triple Bridge", location: {lat: 46.0511374, lng: 14.5062348} },
-      { title: "Prešeren square", location: {lat: 46.051433, lng: 14.5059673} },
-      { title: "Congress Square", location: {lat: 46.0502077, lng: 14.5036985} },
-      { title: "City Park Tivoli", location: {lat: 46.0547165, lng: 14.4948117} },
-      { title: "Ljubljana Castle", location: {lat: 46.0489668, lng: 14.5084904} }
-    ],
-    query: '',
-    markers: [],
-    infowindow: new this.props.google.maps.InfoWindow()
+  constructor(props, context) {
+    super(props, context);
+    
+    this.state = {
+      locations: [
+        { title: "Triple Bridge", location: {lat: 46.0511374, lng: 14.5062348} },
+        { title: "Prešeren square", location: {lat: 46.051433, lng: 14.5059673} },
+        { title: "Congress Square", location: {lat: 46.0502077, lng: 14.5036985} },
+        { title: "City Park Tivoli", location: {lat: 46.0547165, lng: 14.4948117} },
+        { title: "Ljubljana Castle", location: {lat: 46.0489668, lng: 14.5084904} }
+      ],
+      query: '',
+      markers: [],
+      infowindow: new this.props.google.maps.InfoWindow(),
+      visible: true
+    };
+    this.handleMouseDown = this.handleMouseDown.bind(this);
+    this.toggleMenu = this.toggleMenu.bind(this);
   }
+
+  //sidemenu components 
+  handleMouseDown(e) {
+    this.toggleMenu();
+ 
+    console.log("clicked");
+    e.stopPropagation();
+  }
+
+  toggleMenu() {
+    this.setState(
+      {
+        visible: !this.state.visible
+      }
+    );
+  }
+
+  //google maps components
   componentDidMount() {
     this.loadMap()
+    this.onclickLocation()
   }
 
   loadMap() {
@@ -65,7 +92,7 @@ export default class MapContainer extends Component {
 
   populateInfoWindow(marker, infowindow) {
     // Check to make sure the infowindow is not already opened on this marker.
-    if (infowindow.marker != marker) {
+    if (infowindow.marker !== marker) {
       infowindow.marker = marker;
       infowindow.setContent('<div>' + marker.title + '</div>');
       infowindow.open(this.map, marker);
@@ -76,11 +103,46 @@ export default class MapContainer extends Component {
     }
   }
 
+  onclickLocation = () => {
+    const that = this
+    const {infowindow} = this.state
+    const displayInfowindow = (e) => {
+      const {markers} = this.state
+      const markerInd = markers.findIndex(m => m.title.toLowerCase() === e.target.innerText.toLowerCase())
+      that.populateInfoWindow(markers[markerInd], infowindow)
+    }
+    document.querySelector('.locations-list').addEventListener('click', function (e) {
+      if(e.target && e.target.nodeName === "LI") {
+        displayInfowindow(e)
+      }
+    })
+  }
+
   render() {
+    const hideClass = this.state.visible ? 'show' : 'hide'
+    const classes = `sidebarMenu ${hideClass}`
     return (
-      <div role="application" id="map" className="map">
-        Please wait. Loading map ...
-      </div>
+      <div className="Container">
+        <nav>
+          <MenuButton handleMouseDown={this.handleMouseDown}/>
+        </nav>
+        <div className="mainContainer">
+          <div className={classes}
+          id = "sidebarMenu"
+            onChange={this.handleChange}
+          >
+            <ul className="locations-list">{
+              this.state.markers.map((m, i) =>
+                (<li key={i}>{m.title}</li>))
+            }</ul>
+          </div>
+          <div className="Main">
+            <div role="application" id="map" className="map">
+              Please wait. Loading map ...
+            </div>  
+          </div>{ /* end of Main */ }
+        </div>
+      </div> // end of Container
     )
   }
 }
