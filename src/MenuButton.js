@@ -5,8 +5,10 @@ import './MenuButton.css';
 class MenuButton extends Component {
   render() {
     return (
-      <button id="roundButton"
-        onMouseDown={this.props.handleMouseDown}>&#9776;</button>
+      <button id="navigationbutton" tabIndex="0"
+        onMouseDown={this.props.handleMouseDown}
+        onKeyPress={this.props.handleKeyPressMenu}
+      >&#9776;</button>
     );
   }
 }

@@ -22,6 +22,12 @@ export default class MapContainer extends Component {
     this.toggleMenu = this.toggleMenu.bind(this);
   }
 
+  handleKeyPressMenu = (event) => {
+    if(event.key == 'Enter'){
+      console.log("enter pressed")
+      this.toggleMenu();  
+    }
+  }
   //sidemenu components 
   handleMouseDown(e) {
     this.toggleMenu();
@@ -128,6 +134,13 @@ export default class MapContainer extends Component {
         displayInfowindow(event)
       }
     })
+
+    document.querySelector('.locations-list').addEventListener('keypress', function (event) {
+      var key = event.which || event.keyCode;
+      if(event.target && event.target.nodeName === "LI" && key === 13) {
+        displayInfowindow(event)
+      }
+    })
   }
 
   onQueryChange = (event) => {
@@ -136,6 +149,7 @@ export default class MapContainer extends Component {
 
   render() {
     const hideClass = this.state.visible ? 'show' : 'hide'
+    const ariaHidden = this.state.visible ? 'false' : 'true'
     const classes = `sidebarMenu ${hideClass}`
     const { locations } = this.state
     const { markers } = this.state
@@ -162,25 +176,30 @@ export default class MapContainer extends Component {
 
     return (
       <div className="Container">
-        <nav>
-          <MenuButton handleMouseDown={this.handleMouseDown}/>
+        <nav aria-labelledby="navigationbutton">
+          <MenuButton handleMouseDown={this.handleMouseDown}
+            handleKeyPressMenu={this.handleKeyPressMenu}/>
         </nav>
         <div className="mainContainer">
           <div className={classes}
                id = "sidebarMenu"
-               onChange={this.handleChange}>
+               arria-hidden= {ariaHidden}
+               aria-label="Menu Bar"
+               onChange={this.handleChange}
+          >
             <input role="search" type='text' 
+                   aria-label="search field"
                    value={this.state.value}
                    onChange={this.onQueryChange} 
             />
             <ul className="locations-list">{
               this.state.markers.filter(marker => 
                 marker.getVisible()).map((marker, i) =>
-                (<li key={i}>{marker.title}</li>))
+                (<li key={i} tabIndex="0">{marker.title}</li>))
             }</ul>
           </div> {/* end of div className={classes} */}
-          <div className="Main">
-            <div role="application" id="map" className="map">
+          <div className="Main" aria-labelledby="map">
+            <div role="application" id="map" className="map" arria-hidden="true" tabIndex="-1">
               Please wait. Loading map ...
             </div>  
           </div> {/* end of Main */}

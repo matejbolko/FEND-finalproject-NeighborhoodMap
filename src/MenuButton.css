@@ -1,4 +1,4 @@
-#roundButton {
+#navigationbutton {
   background-color: #96D9FF;
   width: 40px;
   height: 40px;
@@ -12,14 +12,18 @@
   margin: 10px;
 }
  
-#roundButton:hover {
+#navigationbutton:hover {
   background-color: #96D9FF;
   cursor: pointer;
   border: 5px solid #037584;
   color: black;
 }
+
+#navigationbutton:focus {
+  border-color: red;
+}
  
-#roundButton:active {
+#navigationbutton:active {
   border-color: #003557;
   background-color: #FFF;
 }
