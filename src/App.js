@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import { GoogleApiWrapper } from 'google-maps-react'
 import MapContainer from './MapContainer'
-import config from './Config'
+import { config } from './Config'
 
 class App extends Component {
 

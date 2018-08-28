@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
 import MenuButton from './MenuButton'
+import axios from 'axios'
+import { config } from './Config.js'
 
 export default class MapContainer extends Component {
   constructor(props, context) {
@@ -7,24 +9,25 @@ export default class MapContainer extends Component {
     
     this.state = {
       locations: [
-        { title: "Triple Bridge", location: {lat: 46.0511374, lng: 14.5062348} },
-        { title: "Prešeren square", location: {lat: 46.051433, lng: 14.5059673} },
-        { title: "Congress Square", location: {lat: 46.0502077, lng: 14.5036985} },
-        { title: "City Park Tivoli", location: {lat: 46.0547165, lng: 14.4948117} },
-        { title: "Ljubljana Castle", location: {lat: 46.0489668, lng: 14.5084904} }
+        { title: "Tromostovje", location: {lat: 46.051035201638676, lng: 14.506290315728124}, fsID: "4bb10df0f964a5204e763ce3", fsLikes: "0" },
+        { title: "Prešernov trg", location: {lat: 46.051483462176165, lng: 14.506030082702637}, fsID: "4bb11095f964a52042773ce3", fsLikes: "0"},
+        { title: "Kongresni trg", location: {lat: 46.05000356217219, lng: 14.504055976867676}, fsID: "4dea04ba18386283a3d94b83", fsLikes: "0"},
+        { title: "Park Tivoli", location: {lat: 46.054530628239405, lng: 14.49695348739624}, fsID: "4bc09b384cdfc9b6f3139321", fsLikes: "0"},
+        { title: "Ljubljanski grad", location: {lat: 46.04890127012711, lng: 14.508854288781148}, fsID: "4c28f25e9eb19521afa22959", fsLikes: "0" }
       ],
       query: '',
       markers: [],
       infowindow: new this.props.google.maps.InfoWindow(),
-      visible: true
+      center: {lat: 46.051035201638676, lng: 14.506290315728124},
+      visible: true,
+      venues: []
     };
     this.handleMouseDown = this.handleMouseDown.bind(this);
     this.toggleMenu = this.toggleMenu.bind(this);
   }
 
   handleKeyPressMenu = (event) => {
-    if(event.key == 'Enter'){
-      console.log("enter pressed")
+    if(event.key === 'Enter'){
       this.toggleMenu();  
     }
   }
@@ -48,6 +51,7 @@ export default class MapContainer extends Component {
   componentDidMount() {
     this.initMap()
     this.onSideMenuLocationClick()
+    this.getFsNumOfLikes()
   }
 
   initMap() {
@@ -56,7 +60,7 @@ export default class MapContainer extends Component {
       const maps = google.maps
 
       const mapCfg = Object.assign({}, {
-        center: {lat: 46.0511449, lng: 14.5040679},
+        center: this.state.center,
         zoom: 11
       })
 
@@ -84,11 +88,15 @@ export default class MapContainer extends Component {
         animation: google.maps.Animation.DROP,
         id: i,
         map: this.map
+
       })
 
       // Create an onclick event to open an infowindow at each marker.
       marker.addListener('click', () => {
+        //center map and put clicked marker on center
+        this.map.panTo(marker.getPosition());
         this.populateInfoWindow(marker, infowindow)
+        //this.setState({center: this.state.locations[i].location })
       })
       // https://stackoverflow.com/questions/26253351/correct-modification-of-state-arrays-in-reactjs
       this.setState((state) => ({
@@ -106,7 +114,9 @@ export default class MapContainer extends Component {
     // Check to make sure the infowindow is not already opened on this marker.
     if (infowindow.marker !== marker) {
       infowindow.marker = marker;
-      infowindow.setContent('<div>' + marker.title + '</div>');
+      infowindow.setContent('<div class="infowindowsTitle">' + marker.title + '</div>' +
+    '<div class="fqNumOfLikes">'+marker.fsLikes+' people likes this place</div>');
+      
       infowindow.open(this.map, marker);
       // Make sure the marker property is cleared if the infowindow is closed.
       infowindow.addListener('closeclick', function() {
@@ -127,6 +137,8 @@ export default class MapContainer extends Component {
       setTimeout(function () {
         markers[i].setAnimation(null);
       }, 2000);
+      //center map and put clicked marker on center
+      this.map.panTo(markers[i].getPosition());
     }
     
     document.querySelector('.locations-list').addEventListener('click', function (event) {
@@ -146,6 +158,37 @@ export default class MapContainer extends Component {
   onQueryChange = (event) => {
     this.setState({query: event.target.value})
   }
+
+  getFsNumOfLikes = () => {
+    this.state.locations.forEach(location => {
+      this.getFsVenues(location.fsID)
+    })
+  }
+
+  getFsVenues = (venue_ID) => {
+    const endPoint = "https://api.foursquare.com/v2/venues/"+venue_ID+"/likes?"
+    const parameters = {
+      client_id: config.FS_client_id,
+      client_secret: config.FS_client_secret,
+      v: "20180828"
+    }
+
+    axios.get(endPoint + new URLSearchParams(parameters))
+    .then(response => {
+      let likes = response.data.response.likes.count
+      for (var i=0; i<this.state.locations.length; i++){
+        if (this.state.locations[i].fsID === venue_ID){
+          this.setState((state) => ({...state.locations[i].fsLikes = likes}))
+          this.setState((state) => ({...state.markers[i].fsLikes = likes}))
+        }
+      }
+      
+      //this.setState({venues: [...this.state.venues, {fsID: venue_ID,likes: likes}]})
+    }).catch(error => {
+      alert("We are sorry, but foursquare returned error: \n"+error);
+    })
+  }
+
 
   render() {
     const hideClass = this.state.visible ? 'show' : 'hide'
