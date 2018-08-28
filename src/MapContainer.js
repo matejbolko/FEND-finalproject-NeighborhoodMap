@@ -125,6 +125,7 @@ export default class MapContainer extends Component {
     }
   }
 
+  // i helped myself with video of Edoh Kodjo - https://www.youtube.com/watch?v=9t1xxypdkrE
   onSideMenuLocationClick = () => {
     const displayInfowindow = (event) => {
       const {markers} = this.state
