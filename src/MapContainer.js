@@ -20,7 +20,8 @@ export default class MapContainer extends Component {
       infowindow: new this.props.google.maps.InfoWindow(),
       center: {lat: 46.051035201638676, lng: 14.506290315728124},
       visible: true,
-      venues: []
+      venues: [],
+      fsError : false
     };
     this.handleMouseDown = this.handleMouseDown.bind(this);
     this.toggleMenu = this.toggleMenu.bind(this);
@@ -35,7 +36,7 @@ export default class MapContainer extends Component {
   handleMouseDown(e) {
     this.toggleMenu();
  
-    console.log("clicked");
+    //console.log("clicked");
     e.stopPropagation();
   }
 
@@ -52,6 +53,15 @@ export default class MapContainer extends Component {
     this.initMap()
     this.onSideMenuLocationClick()
     this.getFsNumOfLikes()
+
+    window.gm_authFailure = () => {
+      alert("Error loading Google Maps, Check The API Key!");
+    };
+
+      window.addEventListener("unhandledrejection", function (event) {
+        console.warn("WARNING: Unhandled promise rejection. Shame on you! Reason: "
+                     + event.reason);
+      });
   }
 
   initMap() {
@@ -66,6 +76,9 @@ export default class MapContainer extends Component {
 
       // https://developers.google.com/maps/documentation/javascript/tutorial
       this.map = new maps.Map(document.getElementById('map'), mapCfg)
+      function gm_authFailure() { 
+        alert("test"); // here you define your authentication failed message
+      };
       this.addMarkers()
     }
   }
@@ -114,8 +127,14 @@ export default class MapContainer extends Component {
     // Check to make sure the infowindow is not already opened on this marker.
     if (infowindow.marker !== marker) {
       infowindow.marker = marker;
-      infowindow.setContent('<div class="infowindowsTitle">' + marker.title + '</div>' +
-    '<div class="fqNumOfLikes">'+marker.fsLikes+' people likes this place</div>');
+      if (this.state.fsError) {
+        infowindow.setContent('<div class="infowindowsTitle" tabIndex="1">' + marker.title + '</div>' +
+    '<div class="fqNumOfLikes error" tabIndex="1">Foursquare is currently unavailable</div>');
+      }
+      else {
+        infowindow.setContent('<div class="infowindowsTitle" tabIndex="1">' + marker.title + '</div>' +
+    '<div class="fqNumOfLikes" tabIndex="1">'+marker.fsLikes+' people likes this place</div>');
+      }
       
       infowindow.open(this.map, marker);
       // Make sure the marker property is cleared if the infowindow is closed.
@@ -186,7 +205,7 @@ export default class MapContainer extends Component {
       
       //this.setState({venues: [...this.state.venues, {fsID: venue_ID,likes: likes}]})
     }).catch(error => {
-      alert("We are sorry, but foursquare returned error: \n"+error);
+      this.setState({fsError: true})
     })
   }
 
@@ -239,11 +258,11 @@ export default class MapContainer extends Component {
             <ul className="locations-list">{
               this.state.markers.filter(marker => 
                 marker.getVisible()).map((marker, i) =>
-                (<li key={i} tabIndex="0">{marker.title}</li>))
+                (<li key={i} tabIndex="0" role="button" aria-labelledby="menu">{marker.title}</li>))
             }</ul>
           </div> {/* end of div className={classes} */}
           <div className="Main" aria-labelledby="map">
-            <div role="application" id="map" className="map" arria-hidden="true" tabIndex="-1">
+            <div role="application" id="map" className="map" tabIndex="-1">
               Please wait. Loading map ...
             </div>  
           </div> {/* end of Main */}

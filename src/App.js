@@ -17,6 +17,10 @@ class App extends Component {
     );
   }
 }
+window.addEventListener("unhandledrejection", function (event) {
+  alert("WARNING: We couldn't load google maps "
+               + event.reason);
+});
 
 export default GoogleApiWrapper({
   apiKey: config.myGoogleMapsToken

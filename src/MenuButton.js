@@ -5,7 +5,7 @@ import './MenuButton.css';
 class MenuButton extends Component {
   render() {
     return (
-      <button id="navigationbutton" tabIndex="0"
+      <button id="navigationbutton" tabIndex="0" aria-label="menu"
         onMouseDown={this.props.handleMouseDown}
         onKeyPress={this.props.handleKeyPressMenu}
       >&#9776;</button>
